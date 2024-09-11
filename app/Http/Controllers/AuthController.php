@@ -4,12 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
     public function login_view()
     {
         return view('auth.login');
+    }
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email', 'max:256'],
+            'password' => ['required', 'string', 'max:256'],
+        ]);
+
+        if (Auth::attempt($request->except(['_token', 'submit']))) {
+            return redirect()->route('dashboard');
+        } else {
+            return redirect()->back()->with([
+                'failure' => 'Invalid login details!'
+            ]);
+        }
     }
 
     public function register_view()
@@ -25,7 +42,7 @@ class AuthController extends Controller
             'password' => ['required', 'confirmed', 'string', 'max:256'],
         ]);
 
-        if(User::create($request->all())) {
+        if (User::create($request->all())) {
             return redirect()->back()->with([
                 'success' => 'Magic has been spelled!'
             ]);
@@ -34,5 +51,10 @@ class AuthController extends Controller
                 'failure' => 'Magic has failed to spell!'
             ]);
         }
+    }
+
+    public function logout() {
+        Auth::logout();
+        return redirect()->route('login');
     }
 }
