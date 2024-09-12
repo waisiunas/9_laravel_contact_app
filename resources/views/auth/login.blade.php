@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 
+@section('title', "Login")
+
 @include('partials.head')
+
+
 
 <body>
     <main class="d-flex w-100">

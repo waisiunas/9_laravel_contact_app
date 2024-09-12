@@ -1,5 +1,7 @@
 @extends('layout.main')
 
+@section('title', "Profile")
+
 @section('content')
     <div class="container-fluid p-0">
         <div class="mb-3">
@@ -13,7 +15,7 @@
                     </div>
                     <div class="card-body h-100">
                         @include('partials.alerts')
-                        <form action="" method="post">
+                        <form action="{{ route('profile.details') }}" method="post">
                             @method('PATCH')
                             @csrf
                             <div class="row">
@@ -22,7 +24,7 @@
                                         <label for="name" class="form-label">Name</label>
                                         <input type="text" name="name" id="name"
                                             class="form-control @error('name') is-invalid @enderror"
-                                            value="" placeholder="Enter your name!">
+                                            value="{{ old('name') ?? $user->name }}" placeholder="Enter your name!">
                                         @error('name')
                                             <div class="text-danger">{{ $message }}</div>
                                         @enderror
@@ -34,7 +36,7 @@
                                         <label for="email" class="form-label">Email</label>
                                         <input type="email" name="email" id="email"
                                             class="form-control @error('email') is-invalid @enderror"
-                                            value=""" placeholder="Enter your email!">
+                                            value="{{ old('email') ?? $user->email }}" placeholder="Enter your email!">
                                         @error('email')
                                             <div class="text-danger">{{ $message }}</div>
                                         @enderror
@@ -52,7 +54,7 @@
                         <h5 class="card-title mb-0">Password</h5>
                     </div>
                     <div class="card-body h-100">
-                        <form action="" method="post">
+                        <form action="{{ route('profile.password') }}" method="post">
                             @csrf
                             @method('PATCH')
                             <div class="row">
@@ -103,17 +105,16 @@
                         <h5 class="card-title mb-0">Profile Picture</h5>
                     </div>
                     <div class="card-body text-center">
-                        {{-- @if ($user->picture)
+                        @if ($user->picture)
                             <img src="{{ asset('template/img/photos/' . $user->picture) }}" alt=}}"
                                 class="img-fluid rounded-circle mb-2" width="128" height="128" />
                         @else
                             <img src="https://ui-avatars.com/api/?name={{ $user->name }}" alt="Placeholder picture"
                                 class="img-fluid rounded-circle mb-2" width="128" height="128" />
-                        @endif --}}
+                        @endif
 
                         <div>
-                            <form action="" method="post"
-                                enctype="multipart/form-data">
+                            <form action="{{ route('profile.picture') }}" method="post" enctype="multipart/form-data">
                                 @csrf
                                 @method('PATCH')
                                 <div class="mb-3">
