@@ -10,23 +10,29 @@ use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
+    private $user;
+
+    public function __construct()
+    {
+        $this->user =  User::find(Auth::id());
+    }
+
+
     public function show()
     {
         return view('profile.show', [
-            'user' => Auth::user(),
+            'user' => $this->user,
         ]);
     }
 
     public function details(Request $request)
     {
-        $user = User::find(Auth::id());
-
         $request->validate([
             'name' => ['required', 'string'],
-            'email' => ['required', 'email', 'unique:users,email,' . $user->id . ',id'],
+            'email' => ['required', 'email', 'unique:users,email,' . $this->user->id . ',id'],
         ]);
 
-        if ($user->update($request->all())) {
+        if ($this->user->update($request->all())) {
             return redirect()->back()->with([
                 'success' => 'Magic has been spelled!'
             ]);
@@ -39,15 +45,13 @@ class ProfileController extends Controller
 
     public function password(Request $request)
     {
-        $user = User::find(Auth::id());
-
         $request->validate([
             'password' => ['required', 'confirmed'],
             'current_password' => ['required'],
         ]);
 
-        if (Hash::check($request->current_password, $user->password)) {
-            if ($user->update($request->all())) {
+        if (Hash::check($request->current_password, $this->user->password)) {
+            if ($this->user->update($request->all())) {
                 return redirect()->back()->with([
                     'success' => 'Magic has been spelled!'
                 ]);
@@ -63,16 +67,14 @@ class ProfileController extends Controller
 
     public function picture(Request $request)
     {
-        $user = User::find(Auth::id());
-
         $request->validate([
             'picture' => ['required', 'image', 'mimes:png,jpg,jpeg,webp'],
         ]);
 
         $target_directory = 'template/img/photos/';
 
-        if ($user->picture && File::exists($target_directory . $user->picture)) {
-            unlink($target_directory . $user->picture);
+        if ($this->user->picture && File::exists($target_directory . $this->user->picture)) {
+            unlink($target_directory . $this->user->picture);
         }
 
         $file_name = $request->picture->hashName();
@@ -82,7 +84,7 @@ class ProfileController extends Controller
                 'picture' => $file_name,
             ];
 
-            if ($user->update($data)) {
+            if ($this->user->update($data)) {
                 return redirect()->back()->with(['success' => 'Magic has been spelled!']);
             } else {
                 return redirect()->back()->with(['failure' => 'Magic has failed to spell!']);
