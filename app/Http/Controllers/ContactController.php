@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Contact;
 use App\Models\Category;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 
 class ContactController extends Controller
 {
@@ -15,10 +16,10 @@ class ContactController extends Controller
      */
     public function index()
     {
-        $user = User::whereId(Auth::id())->with('contacts')->first();
-        // dd($user->contacts);
+        // $user = User::whereId(Auth::id())->with('contacts')->first();
         return view('contact.index', [
-            'contacts' => $user->contacts
+            // 'contacts' => $user->contacts
+            'contacts' => Auth::user()->contacts
         ]);
     }
 
@@ -28,7 +29,8 @@ class ContactController extends Controller
     public function create()
     {
         return view('contact.create', [
-            'categories' => Category::whereUser_id(Auth::id())->get(),
+            'categories' => Auth::user()->categories,
+            // 'categories' => Category::whereUser_id(Auth::id())->get(),
         ]);
     }
 
@@ -70,7 +72,9 @@ class ContactController extends Controller
      */
     public function show(Contact $contact)
     {
-        //
+        return view('contact.show', [
+            'contact' => $contact
+        ]);
     }
 
     /**
@@ -78,7 +82,10 @@ class ContactController extends Controller
      */
     public function edit(Contact $contact)
     {
-        //
+        return view('contact.edit', [
+            'contact' => $contact,
+            'categories' => Auth::user()->categories,
+        ]);
     }
 
     /**
@@ -86,7 +93,47 @@ class ContactController extends Controller
      */
     public function update(Request $request, Contact $contact)
     {
-        //
+        $request->validate([
+            'first_name' => ['required', 'string'],
+            'category_id' => ['required', 'numeric'],
+            'mobile' => ['required', 'string'],
+            'facebook' => ['url', 'nullable'],
+            'instagram' => ['url', 'nullable'],
+            'youtube' => ['url', 'nullable'],
+        ]);
+
+        if ($contact->update($request->all())) {
+            return redirect()->back()->with(['success' => 'Magic has been spelled!']);
+        } else {
+            return redirect()->back()->with(['failure' => 'Magic has failed to spell!']);
+        }
+    }
+
+    public function picture(Request $request, Contact $contact)
+    {
+        $request->validate([
+            'picture' => ['required', 'image', 'mimes:png,jpg,jpeg,webp'],
+        ]);
+
+        $target_directory = 'template/img/contacts/';
+
+        if ($contact->picture && File::exists($target_directory . $contact->picture)) {
+            unlink($target_directory . $contact->picture);
+        }
+
+        $file_name = $request->picture->hashName();
+
+        $request->picture->move(public_path($target_directory), $file_name);
+
+        $data = [
+            'picture' => $file_name,
+        ];
+
+        if ($contact->update($data)) {
+            return redirect()->back()->with(['success' => 'Magic has been spelled!']);
+        } else {
+            return redirect()->back()->with(['failure' => 'Magic has failed to spell!']);
+        }
     }
 
     /**
@@ -94,6 +141,16 @@ class ContactController extends Controller
      */
     public function destroy(Contact $contact)
     {
-        //
+        $target_directory = 'template/img/contacts/';
+
+        if ($contact->picture && File::exists($target_directory . $contact->picture)) {
+            unlink($target_directory . $contact->picture);
+        }
+
+        if ($contact->delete()) {
+            return redirect()->route('contacts')->with(['success' => "Magic has been spelled!"]);
+        } else {
+            return redirect()->route('contacts')->with(['failure' => "Magic has failed to spell!"]);
+        }
     }
 }

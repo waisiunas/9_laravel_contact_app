@@ -56,12 +56,14 @@ async function showCategories() {
     const responseElement = document.querySelector('#response');
     let rows = '';
 
+    console.log(result);
+
     if (result.categories.length > 0) {
         result.categories.forEach(function (category, index) {
             rows += `<tr>
                                         <td>${index + 1}</td>
                                         <td>${category.name}</td>
-                                        <td>0</td>
+                                        <td>${category.contacts_count}</td>
                                         <td>
                                             <button type="button" class="btn btn-primary" onclick="editCategory(${category.id})"
                                                 data-bs-toggle="modal" data-bs-target="#editModal">

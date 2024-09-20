@@ -18,7 +18,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-
+                        @include('partials.alerts')
                         @if (count($contacts) > 0)
                             <table class="table table-bordered m-0">
                                 <thead>
@@ -41,7 +41,8 @@
                                             <td>{{ $contact->email ?? 'N/A' }}</td>
                                             <td>{{ $contact->category->name }}</td>
                                             <td>
-                                                <a href="" class="btn btn-primary">Show</a>
+                                                <a href="{{ route('contact.show', $contact) }}"
+                                                    class="btn btn-primary">Show</a>
                                             </td>
                                         </tr>
                                     @endforeach

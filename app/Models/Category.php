@@ -21,6 +21,6 @@ class Category extends Model
 
     public function contacts()
     {
-        return $this->hasMany(Contact::all());
+        return $this->hasMany(Contact::class);
     }
 }
